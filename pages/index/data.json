@@ -1,0 +1,359 @@
+[
+  {
+    "id": 1,
+    "name": "探秘古都：西安历史文化研学营",
+    "schoolName": "北京师范大学燕化附属中学",
+    "logo": "/static/logo.png",
+    "gradeLevel": 1
+  },
+  {
+    "id": 2,
+    "name": "极地科考：南极冰川探索实验班",
+    "schoolName": "北京师范大学良乡附属中学",
+    "logo": "../../../datum/images/logo.png",
+    "gradeLevel": 3
+  },
+  {
+    "id": 3,
+    "name": "科技未来：人工智能机器人编程营",
+    "schoolName": "北京师范大学亚太实验学校",
+    "logo": "../../../datum/images/img2.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 4,
+    "name": "小小考古学家：恐龙化石挖掘体验营",
+    "schoolName": "北京师范大学奥林匹克花园实验小学",
+    "logo": "../../../datum/images/img3.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 5,
+    "name": "航天梦想：走进酒泉卫星发射中心",
+    "schoolName": "北京师范大学天津附属中学",
+    "logo": "../../../datum/images/img4.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 6,
+    "name": "海洋奇缘：三亚珊瑚礁生态保护营",
+    "schoolName": "北京师范大学天津生态城附属学校",
+    "logo": "../../../datum/images/img5.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 7,
+    "name": "国学经典：论语与儒家文化研习班",
+    "schoolName": "北京师范大学天津静海实验学校",
+    "logo": "../../../datum/images/img6.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 8,
+    "name": "名校访学：常春藤名校深度探访之旅",
+    "schoolName": "北京师范大学保定实验学校",
+    "logo": "../../../datum/images/img7.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 9,
+    "name": "自然博物：山地生态与植物标本制作",
+    "schoolName": "青龙满族自治县第一中学",
+    "logo": "../../../datum/images/img8.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 10,
+    "name": "非遗传承：传统剪纸与皮影艺术工坊",
+    "schoolName": "丰宁满族自治县第一中学",
+    "logo": "../../../datum/images/img9.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 11,
+    "name": "军事特训：少年特种兵国防教育营",
+    "schoolName": "北京师范大学大连普兰店区附属学校",
+    "logo": "../../../datum/images/img10.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 12,
+    "name": "农耕体验：从田间到餐桌的食育课程",
+    "schoolName": "北京师范大学濮阳实验学校",
+    "logo": "../../../datum/images/img11.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 13,
+    "name": "财经素养：模拟股市与商业领袖挑战赛",
+    "schoolName": "北京师范大学包头附属学校",
+    "logo": "../../../datum/images/img12.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 14,
+    "name": "沙漠挑战：库布其沙漠徒步生存营",
+    "schoolName": "北京师范大学鄂尔多斯第二附属学校",
+    "logo": "../../../datum/images/img13.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 15,
+    "name": "海洋工程：潜水艇原理与航海模型制作",
+    "schoolName": "北京师范大学青岛实验学校",
+    "logo": "../../../datum/images/img14.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 16,
+    "name": "石油工业：探秘胜利油田科技研学",
+    "schoolName": "北京师范大学东营实验学校",
+    "logo": "../../../datum/images/img15.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 17,
+    "name": "红色足迹：太行山革命历史寻访之旅",
+    "schoolName": "山西省武乡中学校",
+    "logo": "../../../datum/images/img16.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 18,
+    "name": "蓝色星球：海洋生物多样性科考营",
+    "schoolName": "中国海洋大学附属实验学校",
+    "logo": "../../../datum/images/img17.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 19,
+    "name": "丝绸文化：重走丝绸之路研学营",
+    "schoolName": "北京师范大学南湖附属学校",
+    "logo": "../../../datum/images/img18.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 20,
+    "name": "陶瓷艺术：景德镇陶艺大师体验营",
+    "schoolName": "北京师范大学新余附属学校",
+    "logo": "../../../datum/images/img19.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 21,
+    "name": "戏剧人生：莎士比亚戏剧表演工作坊",
+    "schoolName": "北京师范大学附属嘉兴南湖高级中学",
+    "logo": "../../../datum/images/img20.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 22,
+    "name": "编程创客：青少年黑客马拉松挑战",
+    "schoolName": "北京师范大学台州附属高级中学",
+    "logo": "../../../datum/images/img21.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 23,
+    "name": "徽派建筑：水墨宏村古建测绘营",
+    "schoolName": "北京师范大学芜湖实验学校",
+    "logo": "../../../datum/images/img22.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 24,
+    "name": "舌尖上的科学：食品化学与烹饪实验",
+    "schoolName": "北京师范大学台州实验学校",
+    "logo": "../../../datum/images/img23.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 25,
+    "name": "文房四宝：宣纸与毛笔制作技艺研习",
+    "schoolName": "北京师范大学宣城实验学校",
+    "logo": "../../../datum/images/img24.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 26,
+    "name": "运河文化：京杭大运河历史探秘",
+    "schoolName": "北京师范大学淮安实验学校",
+    "logo": "../../../datum/images/img25.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 27,
+    "name": "阳明心学：走进余姚王阳明故居",
+    "schoolName": "北京师范大学余姚实验学校",
+    "logo": "../../../datum/images/img26.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 28,
+    "name": "豆腐工坊：八公山豆腐制作技艺传承",
+    "schoolName": "北京师范大学淮南实验学校",
+    "logo": "../../../datum/images/img27.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 29,
+    "name": "竹艺匠心：安吉竹编非遗体验营",
+    "schoolName": "北京师范大学丽水实验学校",
+    "logo": "../../../datum/images/img28.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 30,
+    "name": "创新思维：青少年创客发明训练营",
+    "schoolName": "北京师范大学南山附属学校",
+    "logo": "../../../datum/images/img29.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 31,
+    "name": "广府文化：岭南建筑与粤剧艺术之旅",
+    "schoolName": "北京师范大学广州实验学校",
+    "logo": "../../../datum/images/img30.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 32,
+    "name": "热带雨林：海南生态多样性科考营",
+    "schoolName": "北京师范大学万宁实验学校",
+    "logo": "../../../datum/images/img31.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 33,
+    "name": "北部湾探秘：海洋渔业与港口文化",
+    "schoolName": "北京师范大学北海实验中学",
+    "logo": "../../../datum/images/img32.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 34,
+    "name": "铜鼓文化：壮族非遗音乐体验营",
+    "schoolName": "北京师范大学平果实验学校",
+    "logo": "../../../datum/images/img33.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 35,
+    "name": "航天育种：太空蔬菜种植与观察营",
+    "schoolName": "北京师范大学海口附属学校",
+    "logo": "../../../datum/images/img34.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 36,
+    "name": "白茶制作：走进福鼎茶园研学营",
+    "schoolName": "北京师范大学宁德实验学校",
+    "logo": "../../../datum/images/img35.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 37,
+    "name": "舞龙舞狮：岭南传统体育竞技营",
+    "schoolName": "北京师范大学云浮实验学校",
+    "logo": "../../../datum/images/logo.png",
+    "gradeLevel": 1
+  },
+  {
+    "id": 38,
+    "name": "喀斯特地貌：溶洞探险与地质科考",
+    "schoolName": "广西大化瑶族自治县高级中学",
+    "logo": "../../../datum/images/img36.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 39,
+    "name": "现代农业：智慧农场与无人机植保",
+    "schoolName": "珠海市斗门区富山学校",
+    "logo": "../../../datum/images/logo.png",
+    "gradeLevel": 1
+  },
+  {
+    "id": 40,
+    "name": "海洋牧场：深海养殖与渔业科技营",
+    "schoolName": "茂名市电白区第一中学",
+    "logo": "../../../datum/images/img37.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 41,
+    "name": "石油科技：克拉玛依油田探秘之旅",
+    "schoolName": "北京师范大学克拉玛依附属学校",
+    "logo": "../../../datum/images/img38.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 42,
+    "name": "黄土高坡：民俗文化与梯田生态营",
+    "schoolName": "北京师范大学庆阳实验学校",
+    "logo": "../../../datum/images/img39.jpeg",
+    "gradeLevel": 2
+  },
+  {
+    "id": 43,
+    "name": "长城研学：明长城防御体系探秘",
+    "schoolName": "北京师范大学榆林实验学校",
+    "logo": "../../../datum/images/img40.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 44,
+    "name": "煤炭科技：走进现代化矿井体验营",
+    "schoolName": "北京师范大学神木实验学校",
+    "logo": "../../../datum/images/img41.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 45,
+    "name": "高原生态：三江源自然保护区科考",
+    "schoolName": "玉树州第五民族高级中学",
+    "logo": "../../../datum/images/img42.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 46,
+    "name": "黄河文化：母亲河生态保护行动",
+    "schoolName": "兰州大学附属学校",
+    "logo": "../../../datum/images/img43.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 47,
+    "name": "大数据启蒙：青少年数据分析师训练营",
+    "schoolName": "北京师范大学贵阳附属小学",
+    "logo": "../../../datum/images/img44.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 48,
+    "name": "桥梁工程：贵州大桥建设科技研学",
+    "schoolName": "北京师范大学贵阳附属中学",
+    "logo": "../../../datum/images/img45.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 49,
+    "name": "天文观测：喀斯特天眼FAST探秘",
+    "schoolName": "北京师范大学贵安新区附属学校",
+    "logo": "../../../datum/images/img46.jpeg",
+    "gradeLevel": 1
+  },
+  {
+    "id": 50,
+    "name": "溶洞地质：喀斯特地貌形成原理科考",
+    "schoolName": "北京师范大学黔西南龙溪实验学校",
+    "logo": "../../../datum/images/img47.jpeg",
+    "gradeLevel": 3
+  },
+  {
+    "id": 51,
+    "name": "智能制造：重庆工业机器人应用体验",
+    "schoolName": "北京师范大学重庆科学城实验学校",
+    "logo": "../../../datum/images/logo.png",
+    "gradeLevel": 3
+  }
+]
