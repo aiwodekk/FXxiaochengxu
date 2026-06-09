@@ -2,8 +2,9 @@
 	<view class="profile-container">
 		<!-- 用户基本信息 -->
 		<view class="profile-header">
-			<view class="avatar-wrapper" @click="chooseAvatar">
-				<image class="avatar" :src="userInfo.avatar || '/static/default-avatar.png'" mode="aspectFill"></image>
+			<view class="avatar-wrapper">
+				<changeImage :model-value="userInfo.userImage" :user-info="userInfo" @choose="chooseAvatar">
+				</changeImage>
 				<view class="avatar-tip">点击更换</view>
 			</view>
 		</view>
@@ -19,32 +20,21 @@
 			</view>
 			<view class="form-item">
 				<text class="label">手机号</text>
-				<input
-					class="input"
-					v-model="userInfo.phone"
-					placeholder="请输入手机号"
-					type="number"
-					@blur="saveUserInfo"
-				/>
+				<input class="input" v-model="userInfo.tel" placeholder="请输入手机号" type="number" @blur="saveUserInfo" />
 			</view>
 			<view class="form-item">
 				<text class="label">就读学校</text>
 				<picker :value="userInfo.school" :range="schoolList" @change="changeShool">
 					<view>{{ userInfo.school || '请选择学校' }}</view>
 				</picker>
-<!-- 				<input
-					class="input"
-					v-model="userInfo.school"
-					placeholder="请输入学校"
-					@blur="saveUserInfo"
-				/> -->
+				<!-- <input class="input" v-model="userInfo.school" placeholder="请输入学校" @blur="saveUserInfo" /> -->
 			</view>
 			<view class="form-item">
 				<text class="label">年级</text>
 				<picker :value="userInfo.grade" :range="gradeList" @change="changeGrade">
 					<view>{{ userInfo.grade || '请选择年级' }}</view>
 				</picker>
-<!-- 				<input
+				<!-- 				<input
 					class="input"
 					v-model="userInfo.grade"
 					placeholder="请输入年级"
@@ -53,14 +43,13 @@
 			</view>
 			<view class="form-item">
 				<text class="label">班级</text>
-				<input
-					class="input"
-					v-model="userInfo.calssRoom"
-					placeholder="请输入班级"
-					@blur="saveUserInfo"
-				/>
+				<!-- <input class="input" v-model="userInfo.calssRoom" placeholder="请输入班级" @blur="saveUserInfo" /> -->
+				<picker :value="userInfo.calssRoom" :range="calssRoomList" @change="changeCalssRoom">
+					<view>{{ userInfo.calssRoom || '请选择班级' }}</view>
+				</picker>
 			</view>
 		</view>
+
 
 		<!-- 孩子信息管理 -->
 		<!-- 孩子信息功能已隐藏
@@ -94,39 +83,148 @@
 			</view>
 		</view>
 		-->
+		<button style="width: 50%;margin-top: 20px;background-color: #FF9933;color: white;border-radius: 5px;"
+			@click="saveBtn">确定</button>
+
 	</view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
-
+import changeImage from '../../../utils/changeImage.vue'
+import {
+	ref,
+	onMounted
+} from 'vue'
+import {
+	onLoad
+} from '@dcloudio/uni-app'
+import {
+	updateUserInfo,
+	getSchoolList
+} from '../../../api/user'
+import SearchSelect from '../../../utils/SearchSelect.vue'
 const userInfo = ref({
-	avatar: '',
+	userImage: '',
 	nickname: '',
-	phone: '',
+	tel: '',
 	school: '',
 	grade: '',
-	calssRoom:''
+	calssRoom: ''
 })
 const gradeList = ref(['1年级（小学）', '2年级（小学）', '3年级（小学）',
-						'4年级（小学）', '5年级（小学）', '6年级（小学）',
-						'7年级（初中）', '8年级（初中）', '9年级（初中）',
-						'10年级（高中）', '11年级（高中）', '12年级（高中）'
-					])
+	'4年级（小学）', '5年级（小学）', '6年级（小学）',
+	'7年级（初中）', '8年级（初中）', '9年级（初中）',
+	'10年级（高中）', '11年级（高中）', '12年级（高中）'
+])
+const calssRoomList = ref([
+	'1班', '2班', '3班', '4班', '5班',
+	'6班', '7班', '8班', '9班', '10班',
+	'11班', '12班', '13班', '14班', '15班',
+	'16班', '17班', '18班', '19班', '20班',
+	'21班', '22班', '23班', '24班', '25班',
+	'26班', '27班', '28班', '29班', '30班',
+	'31班', '32班', '33班', '34班', '35班',
+	'36班', '37班', '38班', '39班', '40班',
+	'41班', '42班', '43班', '44班', '45班',
+	'46班', '47班', '48班', '49班', '50班'
+])
+const gradeMap = {
+	'1年级（小学）': 1,
+	'2年级（小学）': 2,
+	'3年级（小学）': 3,
+	'4年级（小学）': 4,
+	'5年级（小学）': 5,
+	'6年级（小学）': 6,
+	'7年级（初中）': 7,
+	'8年级（初中）': 8,
+	'9年级（初中）': 9,
+	'10年级（高中）': 10,
+	'11年级（高中）': 11,
+	'12年级（高中）': 12
+}
 const schoolList = ref([])
 const childrenList = ref([])
-
-onLoad(() => {
+const isLogin = ref(false)
+const courseId = ref('')
+onLoad((option) => {
+	console.log(option);
+	if (option?.type === 'login') {
+		isLogin.value = true
+	} else {
+		isLogin.value = false
+	}
+	if (option?.courseId) {
+		courseId.value = option.courseId
+	}
 	loadUserInfo()
 	loadChildrenList()
+	getListSchool()
 })
 
 onMounted(() => {
 	loadUserInfo()
 	loadChildrenList()
 })
+const schoolIdMap = ref({})
+const getListSchool = async () => {
+	try {
+		const res = await getSchoolList()
+		const schoolNames = res.list.map(school => school.name)
+		schoolList.value = schoolNames
+		schoolIdMap.value = res.list.reduce((acc, school) => {
+			acc[school.name] = school.id;
+			return acc;
+		}, {});
+		console.log(schoolIdMap);
 
+	} catch (err) {
+		console.log(err);
+	}
+}
+
+const saveBtn = async () => {
+	const gradeVal = gradeMap[userInfo.value.grade] || ''
+	const schoolVal = schoolIdMap.value[userInfo.value.school] || ''
+	const submitData = {
+		...userInfo.value,
+		grade: gradeVal,
+		school: schoolVal
+	}
+	updateUserInfoMethod(submitData)
+};
+
+const updateUserInfoMethod = async (submitData) => {
+	try {
+		const res = await updateUserInfo(submitData)
+		console.log('后端返回的数据:', res);
+
+		uni.showToast({
+			title: isLogin.value ? '登录成功' : '更新成功！',
+			icon: 'success'
+		});
+		uni.setStorageSync('userInfo', userInfo.value);
+		// 5. 跳转页面或刷新数据
+		setTimeout(() => {
+			if (courseId.value) {
+				uni.redirectTo({
+					url: `/pages/mine/profile/children-edit?mode=add&courseId=${courseId.value}`
+				})
+			} else {
+				uni.switchTab({
+					url: '/pages/mine/mine'
+				});
+			}
+
+		}, 1000);
+
+	} catch (err) {
+		console.error('更新过程发生错误:', err);
+		uni.showToast({
+			title: isLogin.value ? '登录失败' : '更新失败',
+			icon: 'none'
+		});
+	}
+}
 const loadUserInfo = () => {
 	const storedUserInfo = uni.getStorageSync('userInfo')
 	if (storedUserInfo) {
@@ -142,27 +240,49 @@ const loadChildrenList = () => {
 }
 
 const saveUserInfo = () => {
+	if (userInfo.value.tel !== '' && userInfo.value.tel.length !== 11 && !/^1[3-9]\d{9}$/.test(userInfo.value
+		.tel)) {
+		// 提示手机格式
+		uni.showToast({
+			title: '手机号格式错误',
+			icon: 'none'
+		})
+		return
+	}
 	uni.setStorageSync('userInfo', userInfo.value)
 }
 
-const chooseAvatar = () => {
-	uni.chooseImage({
-		count: 1,
-		sizeType: ['compressed'],
-		sourceType: ['album', 'camera'],
-		success: (res) => {
-			const tempFilePath = res.tempFilePaths[0]
-			userInfo.value.avatar = tempFilePath
-			saveUserInfo()
-			uni.showToast({
-				title: '头像已更新',
-				icon: 'success'
-			})
-		},
-		fail: (err) => {
-			console.error('选择头像失败:', err)
-		}
-	})
+const chooseAvatar = async (path) => {
+	userInfo.value.userImage = path;
+	const token = uni.getStorageSync('token')
+	try {
+		const uploadRes = await new Promise((resolve, reject) => {
+			uni.uploadFile({
+				url: 'https://api.schoolbridge.com.cn/api/upload',
+				// url: 'http://192.168.1.238:3000/api/upload',
+				filePath: path,
+				name: 'file',
+				header: {
+					'Authorization': 'Bearer ' + token
+				},
+				success: (res) => {
+					const data = JSON.parse(res.data);
+					console.log('永久头像地址:', data.url);
+				}
+			});
+		});
+
+		userInfo.value.userImage = uploadRes.url;
+	} catch (err) {
+		userInfo.value.userImage = path;
+		uni.showToast({
+			title: '上传失败',
+			icon: 'none'
+		});
+	}
+
+
+	uni.setStorageSync('userInfo', userInfo.value);
 }
 
 const chooseNickname = () => {
@@ -185,6 +305,10 @@ const chooseNickname = () => {
 }
 const changeGrade = (e) => {
 	userInfo.value.grade = gradeList.value[e.detail.value]
+	saveUserInfo()
+}
+const changeCalssRoom = (e) => {
+	userInfo.value.calssRoom = calssRoomList.value[e.detail.value]
 	saveUserInfo()
 }
 const changeShool = (e) => {

@@ -25,6 +25,12 @@
 			}
 		},
 		{
+			"path": "pages/placeholder-detail/index-detail",
+			"style": {
+				"navigationBarTitleText": "访学详情"
+			}
+		},
+		{
 			"path": "pages/news/news",
 			"style": {
 				"navigationBarTitleText": "资讯"

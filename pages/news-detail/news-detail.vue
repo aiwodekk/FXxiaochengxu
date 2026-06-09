@@ -24,6 +24,8 @@
 			</view>
 		</view>
 	</view>
+	{{articleUrl}}
+	<web-view :src="articleUrl"></web-view>
 </template>
 
 <script setup>

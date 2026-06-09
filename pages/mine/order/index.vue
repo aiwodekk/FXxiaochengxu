@@ -2,12 +2,8 @@
 	<view class="order-container">
 		<!-- 订单状态筛选 -->
 		<view class="filter-tabs">
-			<view 
-				v-for="(tab, index) in tabs" 
-				:key="index"
-				:class="['tab-item', { active: currentTab === index }]"
-				@click="switchTab(index)"
-			>
+			<view v-for="(tab, index) in tabs" :key="index" :class="['tab-item', { active: currentTab === index }]"
+				@click="switchTab(index)">
 				{{ tab }}
 			</view>
 		</view>
@@ -17,24 +13,25 @@
 			<view v-if="orderList.length === 0" class="empty-state">
 				<text class="empty-text">暂无订单</text>
 			</view>
-			<view v-else class="order-item" v-for="order in orderList" :key="order.id" @click="goToOrderDetail(order.id)">
+			<view v-else class="order-item" v-for="order in orderList" :key="order.id"
+				@click="goToOrderDetail(order.id)">
 				<view class="order-header">
-					<text class="order-no">订单号: {{ order.orderNo }}</text>
-					<text class="order-status" :class="'status-' + order.status">{{ order.statusText }}</text>
+					<text class="order-no">订单号: {{ order.orderNumber }}</text>
+					<text class="order-status" :class="'status-' + order.status">{{ statusMap[order.status] }}</text>
 				</view>
 				<view class="order-content">
-					<image class="order-image" :src="order.image" mode="aspectFill"></image>
+					<image class="order-image" :src="order.schoolLogo" mode="aspectFill"></image>
 					<view class="order-info">
-						<text class="order-title">{{ order.title }}</text>
-						<text class="order-desc">{{ order.description }}</text>
+						<text class="order-title">{{ order.courseName }}</text>
+						<text class="order-desc">{{ order.school }}</text>
 						<text class="order-price">¥{{ order.price }}</text>
 					</view>
 				</view>
 				<view class="order-footer">
-					<text class="order-time">{{ order.createTime }}</text>
+					<text class="order-time">{{ formatDate(order.time) }}</text>
 					<view class="order-actions">
-						<button v-if="order.statusText !== '已完成'" class="action-btn" size="mini" @click.stop="handleOrderAction(order)">
-							{{ order.actionText }}
+						<button class="action-btn" size="mini" @click.stop="handleOrderAction(order)">
+							{{ order.status === 'PENDING' ? '立即付款' : order.status === 'PAID' ? '申请退款' : '联系客服' }}
 						</button>
 					</view>
 				</view>
@@ -44,243 +41,282 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
-
-const tabs = ['全部', '待付款', '进行中', '已完成', '已取消']
-const currentTab = ref(0)
-
-// 模拟订单数据
-const allOrders = ref([
-	{
-		id: 1,
-		orderNo: 'FX202604130001',
-		title: '北京访学之旅',
-		description: '北京大学访学体验',
-		image: '/static/logo.png',
-		price: 2999.00,
-		status: 1,
-		statusText: '待付款',
-		createTime: '2026-04-13 10:30',
-		actionText: '立即付款'
-	},
-	{
-		id: 2,
-		orderNo: 'FX202604120002',
-		title: '上海访学营',
-		description: '复旦大学访学项目',
-		image: '/static/logo.png',
-		price: 3599.00,
-		status: 2,
-		statusText: '进行中',
-		createTime: '2026-04-12 14:20',
-		actionText: '申请退款'
-	},
-	{
-		id: 3,
-		orderNo: 'FX202604100003',
-		title: '深圳访学行',
-		description: '深圳大学访学活动',
-		image: '/static/logo.png',
-		price: 1999.00,
-		status: 3,
-		statusText: '已完成',
-		createTime: '2026-04-10 09:15',
-		actionText: '再次购买'
+	import {
+		ref,
+		computed,
+		onMounted
+	} from 'vue'
+	import {
+		onLoad
+	} from '@dcloudio/uni-app'
+	import {
+		getOrderList,
+		applyRefund,
+		updateOrderStatus
+	} from '../../../api/order'
+	const tabs = ['全部', '待付款', '进行中', '已完成', '已退款']
+	const statusList = ['PENDING', 'PAID', 'COMPLETED', 'REFUNDED']
+	const statusMap = {
+		'PENDING': '待支付',
+		'PAID': '已支付',
+		'CANCELLED': '已取消',
+		'COMPLETED': '已完成',
+		'REFUNDING': '退款中',
+		'REFUNDED': '已退款'
 	}
-])
 
-const orderList = computed(() => {
-	if (currentTab.value === 0) {
-		return allOrders.value
-	}
-	return allOrders.value.filter(order => order.status === currentTab.value)
-})
+	const currentTab = ref(0)
 
-onLoad(() => {
-	// 页面加载时可以请求订单数据
-})
+	// 模拟订单数据
+	const allOrders = ref([])
 
-const switchTab = (index) => {
-	currentTab.value = index
-}
+	const orderList = ref([])
 
-const goToOrderDetail = (id) => {
-	uni.navigateTo({
-		url: `/pages/mine/order/detail?id=${id}`
+	onLoad(() => {
+		// 页面加载时可以请求订单数据
+		fetchOrders()
 	})
-}
 
-const handleOrderAction = (order) => {
-	if (order.status === 1) {
-		uni.showToast({
-			title: '付款功能开发中',
-			icon: 'none'
-		})
-	} else if (order.status === 2) {
-		goToOrderDetail(order.id)
-	} else {
-		goToOrderDetail(order.id)
+	// 时间格式转化IOS转Y-M-D
+	const formatDate = (date) => {
+		const d = new Date(date);
+		const year = d.getFullYear();
+		const month = String(d.getMonth() + 1).padStart(2, '0');
+		const day = String(d.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
 	}
-}
+	// 获取订单列表
+	const fetchOrders = async (data) => {
+		if (!data) {
+			data = {
+				page: 1,
+				size: 100,
+			}
+			if (currentTab.value > 0) {
+				data.status = statusList[currentTab.value - 1]
+			}
+		}
+		const res = await getOrderList(data)
+		allOrders.value = res.list
+		orderList.value = allOrders.value
+	}
+
+	const switchTab = (index) => {
+		currentTab.value = index
+		fetchOrders()
+	}
+
+	const goToOrderDetail = (id) => {
+		uni.navigateTo({
+			url: `/pages/mine/order/detail?id=${id}`
+		})
+	}
+
+	const handleOrderAction = (order) => {
+		if (order.status === 'PENDING') {
+			goToOrderDetail(order.id)
+		} else if (order.status === 'PAID') {
+			uni.showModal({
+				title: '申请退款',
+				editable: true,
+				placeholderText: '请输入退款原因',
+				success: (res) => {
+					console.log(order.id);
+					console.log(res.content);
+					if (res.confirm) {
+						applyRefund({
+								orderId: order.id,
+								reason: res.content || '无理由退款'
+							})
+							.then(() => {
+								uni.showToast({
+									title: '退款申请已提交',
+									icon: 'success'
+								})
+								fetchOrders()
+							})
+							.catch(() => {
+								uni.showToast({
+									title: '退款申请失败',
+									icon: 'none'
+								})
+							})
+					}
+				}
+			})
+		} else {
+			// 联系客服
+			uni.navigateTo({
+				url: '/pages/mine/customer-service/index'
+			})
+		}
+	}
 </script>
 
 <style scoped>
-.order-container {
-	min-height: 100vh;
-	background-color: #f5f5f5;
-}
+	.order-container {
+		min-height: 100vh;
+		background-color: #f5f5f5;
+	}
 
-.filter-tabs {
-	display: flex;
-	background-color: #ffffff;
-	padding: 20rpx 0;
-}
+	.filter-tabs {
+		display: flex;
+		background-color: #ffffff;
+		padding: 20rpx 0;
+	}
 
-.tab-item {
-	flex: 1;
-	text-align: center;
-	font-size: 28rpx;
-	color: #666666;
-	padding: 15rpx 0;
-	position: relative;
-}
+	.tab-item {
+		flex: 1;
+		text-align: center;
+		font-size: 28rpx;
+		color: #666666;
+		padding: 15rpx 0;
+		position: relative;
+	}
 
-.tab-item.active {
-	color: rgb(255, 144, 62);
-	font-weight: bold;
-}
+	.tab-item.active {
+		color: rgb(255, 144, 62);
+		font-weight: bold;
+	}
 
-.tab-item.active::after {
-	content: '';
-	position: absolute;
-	bottom: 0;
-	left: 50%;
-	transform: translateX(-50%);
-	width: 40rpx;
-	height: 4rpx;
-	background-color: rgb(255, 144, 62);
-	border-radius: 2rpx;
-}
+	.tab-item.active::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 40rpx;
+		height: 4rpx;
+		background-color: rgb(255, 144, 62);
+		border-radius: 2rpx;
+	}
 
-.order-list {
-	padding: 20rpx;
-}
+	.order-list {
+		padding: 20rpx;
+	}
 
-.empty-state {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 100rpx 0;
-}
+	.empty-state {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 100rpx 0;
+	}
 
-.empty-text {
-	font-size: 30rpx;
-	color: #999999;
-}
+	.empty-text {
+		font-size: 30rpx;
+		color: #999999;
+	}
 
-.order-item {
-	background-color: #ffffff;
-	border-radius: 12rpx;
-	margin-bottom: 20rpx;
-	padding: 30rpx;
-}
+	.order-item {
+		background-color: #ffffff;
+		border-radius: 12rpx;
+		margin-bottom: 20rpx;
+		padding: 30rpx;
+	}
 
-.order-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding-bottom: 20rpx;
-	border-bottom: 1rpx solid #f0f0f0;
-}
+	.order-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: 20rpx;
+		border-bottom: 1rpx solid #f0f0f0;
+	}
 
-.order-no {
-	font-size: 26rpx;
-	color: #999999;
-}
+	.order-no {
+		font-size: 26rpx;
+		color: #999999;
+	}
 
-.order-status {
-	font-size: 26rpx;
-	font-weight: bold;
-}
+	.order-status {
+		font-size: 26rpx;
+		font-weight: bold;
+	}
 
-.status-1 {
-	color: #ff9800;
-}
+	.status-PENDING {
+		color: #ff9800;
+	}
 
-.status-2 {
-	color: #2196f3;
-}
+	.status-PAID {
+		color: #2196f3;
+	}
 
-.status-3 {
-	color: #4caf50;
-}
+	.status-CANCELLED {
+		color: #999999;
+	}
 
-.status-4 {
-	color: #999999;
-}
+	.status-COMPLETED {
+		color: #4caf50;
+	}
 
-.order-content {
-	display: flex;
-	padding: 20rpx 0;
-}
+	.status-REFUNDING {
+		color: #ff9800;
+	}
 
-.order-image {
-	width: 160rpx;
-	height: 160rpx;
-	border-radius: 80rpx;
-	flex-shrink: 0;
-}
+	.status-REFUNDED {
+		color: #999999;
+	}
 
-.order-info {
-	flex: 1;
-	margin-left: 20rpx;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-}
+	.order-content {
+		display: flex;
+		padding: 20rpx 0;
+	}
 
-.order-title {
-	font-size: 30rpx;
-	color: #333333;
-	font-weight: bold;
-	margin-bottom: 10rpx;
-}
+	.order-image {
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 80rpx;
+		flex-shrink: 0;
+	}
 
-.order-desc {
-	font-size: 24rpx;
-	color: #999999;
-	margin-bottom: 10rpx;
-}
+	.order-info {
+		flex: 1;
+		margin-left: 20rpx;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
 
-.order-price {
-	font-size: 32rpx;
-	color: #ff4d4f;
-	font-weight: bold;
-}
+	.order-title {
+		font-size: 30rpx;
+		color: #333333;
+		font-weight: bold;
+		margin-bottom: 10rpx;
+	}
 
-.order-footer {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding-top: 20rpx;
-	border-top: 1rpx solid #f0f0f0;
-}
+	.order-desc {
+		font-size: 24rpx;
+		color: #999999;
+		margin-bottom: 10rpx;
+	}
 
-.order-time {
-	font-size: 24rpx;
-	color: #999999;
-}
+	.order-price {
+		font-size: 32rpx;
+		color: #ff4d4f;
+		font-weight: bold;
+	}
 
-.order-actions {
-	display: flex;
-	gap: 10rpx;
-}
+	.order-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-top: 20rpx;
+		border-top: 1rpx solid #f0f0f0;
+	}
 
-.action-btn {
-	background-color: rgb(255, 144, 62);
-	color: #ffffff;
-	font-size: 24rpx;
-	border-radius: 8rpx;
-}
+	.order-time {
+		font-size: 24rpx;
+		color: #999999;
+	}
+
+	.order-actions {
+		display: flex;
+		gap: 10rpx;
+	}
+
+	.action-btn {
+		background-color: rgb(255, 144, 62);
+		color: #ffffff;
+		font-size: 24rpx;
+		border-radius: 8rpx;
+	}
 </style>

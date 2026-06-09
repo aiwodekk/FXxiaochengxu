@@ -3,23 +3,24 @@
 		<view class="content">
 			<!-- 搜索框 -->
 			<view class="search-box">
-				<input class="search-input" v-model="searchKeyword" placeholder="搜索学校" @confirm="onSearch" @input="onSearchInput" />
-				<picker class="search-btn" :value="cityIndex" :range="cityList" @change="onCityChange">
-				  <view class="search-text">
-				    {{ cityIndex === 0 ? '所在城市' : cityList[cityIndex] }}
-				  </view>
-				</picker>
-				<picker class="search-btn" :value="categoryIndex" :range="categoryList" @change="onCategoryChange">
-				  <view class="search-text">
-				    {{ categoryIndex === 0 ? '课程分类' : categoryList[categoryIndex] }}
-				  </view>
-				</picker>
+				<input class="search-input" v-model="searchKeyword" placeholder="搜索学校" @input="onSearchInput" />
 				<view class="search-btn" @click="onSearch">
 					<text class="search-text">搜索</text>
 				</view>
+				<picker class="search-btn" :value="cityIndex" :range="cityList" @change="onCityChange">
+					<view class="search-text">
+						{{ cityIndex === 0 ? '所在城市' : cityList[cityIndex] }}
+					</view>
+				</picker>
+				<picker class="search-btn" :value="categoryIndex" :range="categoryList" @change="onCategoryChange">
+					<view class="search-text">
+						{{ categoryIndex === 0 ? '课程分类' : categoryList[categoryIndex] }}
+					</view>
+				</picker>
+
 			</view>
 			<!-- 轮播图 -->
-			<swiper class="banner-swiper" :indicator-dots="true"  :duration="500">
+			<swiper v-if="bannerList.length > 0" class="banner-swiper" :indicator-dots="true" :duration="500">
 				<swiper-item v-for="(item, index) in bannerList" :key="index">
 					<image class="banner-image" :src="item.image" mode="aspectFill"></image>
 				</swiper-item>
@@ -30,30 +31,26 @@
 				<view class="title-block"></view>
 				<text class="title-text">课程列表</text>
 			</view>
-			      <view class="grade-tabs">
-			        <view 
-			          v-for="(tab, index) in gradeTabs" 
-			          :key="index" 
-			          class="tab-item" 
-			          :class="{ 'active': currentGradeIndex === index }"
-			          @click="onGradeTabChange(index)"
-			        >
-			          {{ tab }}
-			        </view>
-			      </view>
+			<view class="grade-tabs">
+				<view v-for="(tab, index) in gradeTabs" :key="index" class="tab-item"
+					:class="{ 'active': currentGradeIndex === index }" @click="onGradeTabChange(index)">
+					{{ tab }}
+				</view>
+			</view>
 			<view class="course-list">
-				<view class="course-item" v-for="(item, index) in displayCourseList" :key="item.id" @click="goToCourseDetail(item)">
-					<image class="school-logo" :src="item.logo" mode="aspectFit"></image>
+				<view class="course-item" v-for="(item, index) in displayCourseList" :key="item.id"
+					@click="goToCourseDetail(item)">
+					<image class="school-logo" :src="item.schoolLogo" mode="aspectFit"></image>
 					<view class="course-info">
 						<text class="course-name">{{ item.name }}</text>
-						<text class="course-school">{{ item.schoolName }}</text>
+						<text class="course-school">{{ item.school }}</text>
 					</view>
 					<view class="classStyle">
-						{{item.gradeLevel === 1 ? '小学' : item.gradeLevel === 2 ? '初中' : '高中'}}
+						{{ item.grade }}
 					</view>
 				</view>
 			</view>
-			
+
 			<!-- 加载更多提示 -->
 			<view class="loading-more" v-if="isLoading">
 				<text class="loading-text">加载中...</text>
@@ -66,10 +63,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { onLoad, onReachBottom } from '@dcloudio/uni-app'
-import courseData from './data.json';
-const courseList = ref([])
+import {
+	ref
+} from 'vue'
+import {
+	onLoad,
+	onReachBottom
+} from '@dcloudio/uni-app'
+
+import {
+	getDomesticCourseBanners,
+	getDomesticCourses,
+	getCourseCategories,
+	getCityList
+} from '../../api/course'
 const displayCourseList = ref([])
 const searchKeyword = ref('')
 const bannerList = ref([])
@@ -81,46 +88,69 @@ const pageSize = 20
 const cityList = ref(['全部', '北京', '上海', '广州', '深圳', '杭州'])
 const categoryList = ref(['全部', '数学', '英语', '物理', '化学', '编程'])
 const cityIndex = ref(0)
+const cityCodeList = ref([])
 const categoryIndex = ref(0)
-const gradeTabs = ref([ '小学', '初中', '高中'])
+const categoryCodeList = ref([])
+const gradeTabs = ref(['小学', '初中', '高中'])
 const currentGradeIndex = ref(0) // 当前选中的 Tab 索引
 onLoad(() => {
-	courseList.value = courseData
 	// 轮播图数据
-	bannerList.value = [
-		{ id: 1, image: '/static/logo.png' },
-		{ id: 2, image: '/static/课表(1).jpg' },
-		{ id: 3, image: '/static/特色(1).jpg' }
-	]
-	
+	bannerList.value = []
+
 	// 初始加载第一页数据
 	loadMoreData()
+	fetchFilterData()
 })
 
+// 获取轮播图、课程分类和城市
+const fetchFilterData = async () => {
+	try {
+		const banners = await getDomesticCourseBanners()
+		console.log(banners);
+		banners.list.forEach((item, index) => {
+			bannerList.value.push({
+				id: index,
+				image: item.url
+			})
+		});
+		const categories = await getCourseCategories()
+		categoryCodeList.value = categories.list.map(cat => cat.code)
+		const categoryNames = categories.list.map(cat => cat.name)
+		categoryList.value = ['全部', ...categoryNames]
+
+		const cities = await getCityList()
+		cityCodeList.value = cities.list.map(city => city.code)
+		const cityNames = cities.list.map(city => city.name)
+
+		cityList.value = ['全部', ...cityNames]
+		console.log(categories);
+		console.log(cities);
+
+	} catch (error) {
+		console.error('获取筛选数据失败:', error)
+	}
+}
+
+
 // 加载更多数据
-const loadMoreData = () => {
+const loadMoreData = async (isSearch = false, data = null) => {
 	if (isLoading.value || noMore.value) return
-	
-	// 如果有搜索关键词，不进行懒加载
-	if (searchKeyword.value.trim()) return
-	
-	isLoading.value = true
-	
-	// 模拟网络延迟
-	setTimeout(() => {
-		const start = (currentPage.value - 1) * pageSize
-		const end = start + pageSize
-		const newData = courseList.value.slice(start, end)
-		
-		displayCourseList.value = [...displayCourseList.value, ...newData]
-		currentPage.value++
-		isLoading.value = false
-		
-		// 判断是否还有更多数据
-		if (end >= courseList.value.length) {
-			noMore.value = true
+	if (!data) {
+		data = {
+			page: currentPage.value,
+			size: pageSize,
+			grade: gradeTabs.value[currentGradeIndex.value],
 		}
-	}, 500)
+	}
+	isLoading.value = true
+	const res = await getDomesticCourses(data)
+	console.log(res.list);
+	displayCourseList.value = isSearch ? res.list : [...displayCourseList.value, ...res.list]
+	if (res.list.length < pageSize) {
+		noMore.value = true
+	}
+	currentPage.value += 1
+	isLoading.value = false
 }
 
 // 触底加载
@@ -130,43 +160,54 @@ onReachBottom(() => {
 
 // 新增：学段 Tab 点击事件
 const onGradeTabChange = (index) => {
-  currentGradeIndex.value = index
+	currentGradeIndex.value = index
+	onSearch() // 切换学段后执行搜索，应用新的筛选条件
 }
 
 const onCityChange = (e) => {
-  cityIndex.value = e.detail.value
+	cityIndex.value = e.detail.value
+	onSearch() // 切换学段后执行搜索，应用新的筛选条件
 }
 
 // 新增：分类选择变化
 const onCategoryChange = (e) => {
-  categoryIndex.value = e.detail.value
+	categoryIndex.value = e.detail.value
+	onSearch() // 切换学段后执行搜索，应用新的筛选条件
 }
 
 const onSearch = () => {
+	noMore.value = false
+	currentPage.value = 1
 	const keyword = searchKeyword.value.trim()
-	
-	if (!keyword) {
-		// 如果搜索框为空，恢复懒加载模式
-		resetToLazyLoad()
-		return
+	const data = {
+		page: 1,
+		size: pageSize,
+		grade: gradeTabs.value[currentGradeIndex.value],
 	}
-	
-	// 根据学校名称进行模糊搜索
-	const filteredCourses = courseList.value.filter(item => 
-		item.schoolName.includes(keyword)
-	)
-	
-	displayCourseList.value = filteredCourses
-	console.log(displayCourseList.value);
-	noMore.value = true // 搜索完成后显示"没有更多了"
-	
+	if (cityIndex.value !== 0) {
+		const cityCode = cityCodeList.value[cityIndex.value - 1]
+		if (cityCode) { // 二次检查，确保取到的值也是有效的
+			data.city = String(cityCode)
+		}
+	}
+	if (categoryIndex.value !== 0) {
+		const categoryCode = categoryCodeList.value[categoryIndex.value - 1]
+		if (categoryCode) {
+			data.type = String(categoryCode)
+		}
+	}
+	if (keyword) {
+		data.school = keyword
+	}
+	loadMoreData(true, data)
+
 }
 
 // 搜索框输入时触发
 const onSearchInput = () => {
 	if (!searchKeyword.value.trim()) {
 		// 输入框为空时，恢复懒加载模式
-		resetToLazyLoad()
+		onSearch() // 切换学段后执行搜索，应用新的筛选条件
 	}
 }
 
@@ -187,31 +228,32 @@ const goToCourseDetail = (item) => {
 </script>
 
 <style scoped>
-	.grade-tabs {
-	  width: 100%;
-	  white-space: nowrap;
-	  padding: 0 20rpx;
-	  margin-bottom: 20rpx;
-	  display: flex;
-	  justify-content: space-around;
-	}
-	
-	.tab-item {
-	  display: inline-block;
-	  padding: 16rpx 30rpx;
-	  margin-right: 20rpx;
-	  font-size: 28rpx;
-	  color: #666666;
-	  border-radius: 30rpx;
-	  background-color: #f5f5f5;
-	  transition: all 0.3s ease;
-	}
-	
-	.tab-item.active {
-	  color: #ffffff;
-	  background-color: rgb(255, 144, 62);
-	  font-weight: bold;
-	}
+.grade-tabs {
+	width: 100%;
+	white-space: nowrap;
+	padding: 0 20rpx;
+	margin-bottom: 20rpx;
+	display: flex;
+	justify-content: space-around;
+}
+
+.tab-item {
+	display: inline-block;
+	padding: 16rpx 30rpx;
+	margin-right: 20rpx;
+	font-size: 28rpx;
+	color: #666666;
+	border-radius: 30rpx;
+	background-color: #f5f5f5;
+	transition: all 0.3s ease;
+}
+
+.tab-item.active {
+	color: #ffffff;
+	background-color: rgb(255, 144, 62);
+	font-weight: bold;
+}
+
 .home-container {
 	display: flex;
 	flex-direction: column;
@@ -246,6 +288,7 @@ const goToCourseDetail = (item) => {
 }
 
 .search-btn {
+	max-width: 160rpx;
 	margin-left: 20rpx;
 	height: 70rpx;
 	padding: 0 30rpx;
@@ -257,7 +300,7 @@ const goToCourseDetail = (item) => {
 }
 
 .search-text {
-	font-size: 28rpx;
+	font-size: 22rpx;
 	color: #ffffff;
 	font-weight: bold;
 }
