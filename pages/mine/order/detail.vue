@@ -148,6 +148,8 @@
 	import {
 		getOrderDetail,
 		applyRefund,
+		payOrderApi,
+		updateOrderStatus,
 	} from '../../../api/order'
 	const orderId = ref('')
 	const statusMap = {
@@ -189,24 +191,16 @@
 				title: '正在支付...'
 			})
 
-			// TODO: 调用后端接口创建订单
-			const paymentParams = {
-				timeStamp: String(Date.now()),
-				nonceStr: 'nonceStr123456',
-				package: 'prepay_id=wx20240413123456789',
-				signType: 'MD5',
-				paySign: 'paySign123456'
-			}
+			const res = await payOrderApi({ orderId: orderId.value })
 
-			// 调用微信支付
 			await new Promise((resolve, reject) => {
 				uni.requestPayment({
 					provider: 'wxpay',
-					timeStamp: paymentParams.timeStamp,
-					nonceStr: paymentParams.nonceStr,
-					package: paymentParams.package,
-					signType: paymentParams.signType,
-					paySign: paymentParams.paySign,
+					timeStamp: res.payParams.data.timeStamp,
+					nonceStr: res.payParams.data.nonceStr,
+					package: res.payParams.data.package,
+					signType: res.payParams.data.signType,
+					paySign: res.payParams.data.paySign,
 					success: (res) => resolve(res),
 					fail: (err) => reject(err)
 				})
@@ -218,11 +212,11 @@
 				icon: 'success'
 			})
 
-			// 更新订单状态
-			orderDetail.value.status = 2
-			orderDetail.value.statusText = '进行中'
-			statusIcon.value = '✅'
-			statusTip.value = '课程进行中，敬请期待'
+			await updateOrderStatus({
+				orderId: orderId.value,
+				status: 'PAID'
+			})
+			loadOrderDetail()
 
 		} catch (err) {
 			uni.hideLoading()

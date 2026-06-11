@@ -23,3 +23,8 @@ export function updateOrderStatus(data) {
 export function applyRefund(data) {
   return request.post('/order/refund', data);
 }
+
+// 支付订单（获取支付参数）
+export function payOrderApi(data) {
+  return request.post('/order/resume-pay', data);
+}

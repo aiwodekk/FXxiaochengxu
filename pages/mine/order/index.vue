@@ -52,7 +52,8 @@
 	import {
 		getOrderList,
 		applyRefund,
-		updateOrderStatus
+		updateOrderStatus,
+		payOrderApi,
 	} from '../../../api/order'
 	const tabs = ['全部', '待付款', '进行中', '已完成', '已退款']
 	const statusList = ['PENDING', 'PAID', 'COMPLETED', 'REFUNDED']
@@ -112,9 +113,54 @@
 		})
 	}
 
-	const handleOrderAction = (order) => {
+	const handleOrderAction = async (order) => {
 		if (order.status === 'PENDING') {
-			goToOrderDetail(order.id)
+			try {
+				uni.showLoading({
+					title: '正在支付...'
+				})
+
+				const res = await payOrderApi({ orderId: order.id })
+
+				await new Promise((resolve, reject) => {
+					uni.requestPayment({
+						provider: 'wxpay',
+						timeStamp: res.payParams.data.timeStamp,
+						nonceStr: res.payParams.data.nonceStr,
+						package: res.payParams.data.package,
+						signType: res.payParams.data.signType,
+						paySign: res.payParams.data.paySign,
+						success: (res) => resolve(res),
+						fail: (err) => reject(err)
+					})
+				})
+	
+				uni.hideLoading()
+				uni.showToast({
+					title: '支付成功',
+					icon: 'success'
+				})
+
+				await updateOrderStatus({
+					orderId: order.id,
+					status: 'PAID'
+				})
+				fetchOrders()
+
+			} catch (err) {
+				uni.hideLoading()
+				if (err.errMsg && err.errMsg.includes('cancel')) {
+					uni.showToast({
+						title: '已取消支付',
+						icon: 'none'
+					})
+				} else {
+					uni.showToast({
+						title: '支付失败',
+						icon: 'error'
+					})
+				}
+			}
 		} else if (order.status === 'PAID') {
 			uni.showModal({
 				title: '申请退款',
