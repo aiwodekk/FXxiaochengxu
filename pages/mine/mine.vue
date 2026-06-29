@@ -39,7 +39,7 @@
 
 		<!-- 退出登录 -->
 		<view class="logout-section">
-			<button class="logout-btn" @click="handleLogout">{{ isLoggedIn ? '退出登录' : '立即登录' }}</button>
+			<button class="logout-btn" @click="handleLoginOrLogout">{{ isLoggedIn ? '退出登录' : '立即登录' }}</button>
 		</view>
 	</view>
 </template>
@@ -56,9 +56,9 @@
 	} from '@dcloudio/uni-app'
 	import changeImage from '../../utils/changeImage.vue'
 	import {
-		login,
 		logout
 	} from '../../api/user'
+	import { wechatLogin } from '../../utils/auth'
 	const userInfo = ref({
 		userImage: '',
 		nickname: '',
@@ -118,64 +118,42 @@
 		     });
 	}
 
-	const handleLogout = async () => {
+	const handleLoginOrLogout = async () => {
 		if (!uni.getStorageSync('token')) {
 			try {
-				const loginRes = await uni.login({
-					provider: 'weixin'
-				});
-
-				if (!loginRes.code) {
-					uni.showToast({
-						title: '获取登录凭证失败',
-						icon: 'none'
-					});
-					return;
-				}
-				const res = await login({
-					code: loginRes.code
-				});
-				uni.setStorageSync('token', res.token);
+				await wechatLogin()
 				uni.navigateTo({
 					url: '/pages/mine/profile/index?type=login'
 				})
-			
-		} catch (err) {
-			console.error('登录过程发生错误:', err);
-			uni.showToast({
-				title: '登录失败',
-				icon: 'none'
-			});
-		}
-		return
-	}
-	uni.showModal({
-		title: '提示',
-		content: '确定要退出登录吗?',
-		success: (res) => {
-			if (res.confirm) {
-				// 调用退出登录 API
-				logout();
-				// 清除本地存储的用户信息
-				uni.removeStorageSync('userInfo')
-				uni.removeStorageSync('token')
-				isLoggedIn.value = false
-				// 重置用户信息
-				userInfo.value = {
-					userImage: '',
-					nickname: '',
-					tel: '',
-					school: '',
-					grade: '',
-					calssRoom: ''
-				}
-				uni.showToast({
-					title: '已退出登录',
-					icon: 'success'
-				})
+			} catch (err) {
+				console.error('登录过程发生错误:', err)
 			}
+			return
 		}
-	})
+		uni.showModal({
+			title: '提示',
+			content: '确定要退出登录吗?',
+			success: (modalRes) => {
+				if (modalRes.confirm) {
+					logout()
+					uni.removeStorageSync('userInfo')
+					uni.removeStorageSync('token')
+					isLoggedIn.value = false
+					userInfo.value = {
+						userImage: '',
+						nickname: '',
+						tel: '',
+						school: '',
+						grade: '',
+						calssRoom: ''
+					}
+					uni.showToast({
+						title: '已退出登录',
+						icon: 'success'
+					})
+				}
+			}
+		})
 	}
 </script>
 

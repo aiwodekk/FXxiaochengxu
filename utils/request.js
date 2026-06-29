@@ -67,15 +67,22 @@ class Request {
 			// 如果不确定后端格式，可以直接 resolve(res)，让调用层去解构
 			resolve(data);
 		} else if (statusCode === 401) {
-			// 统一处理登录过期，与退出登录保持一致
 			uni.removeStorageSync('token');
 			uni.removeStorageSync('userInfo');
-			uni.showToast({
-				title: '登录已过期',
-				icon: 'none'
-			});
-			
+
 			reject(res);
+
+			setTimeout(() => {
+				uni.showModal({
+					title: '提示',
+					content: '登录已过期，请重新登录',
+					success: (modalRes) => {
+						if (modalRes.confirm) {
+							uni.switchTab({ url: '/pages/mine/mine' })
+						}
+					}
+				})
+			}, 100)
 		} else {
 			// HTTP 错误
 			uni.showToast({

@@ -113,9 +113,7 @@ import {
 import {
 	getDomesticCourseDetail
 } from '../../api/course'
-import {
-	login
-} from '../../api/user'
+import { wechatLogin } from '../../utils/auth'
 // --- 数据模拟 ---
 // 轮播图占位
 const bannerImages = [];
@@ -340,45 +338,25 @@ const closePopup = () => {
 };
 
 const confirmJoin = () => {
-	if (uni.getStorageSync('token')&&uni.getStorageSync('userInfo')) {
+	if (uni.getStorageSync('token') && uni.getStorageSync('userInfo')) {
 		closePopup();
 		uni.navigateTo({
 			url: `/pages/mine/profile/children-edit?mode=add&courseId=${courseId.value}`
 		})
 	} else {
-		// 提示登录，点击确定跳转到登录页面
 		uni.showModal({
 			title: '提示',
 			content: '请先登录',
-			success: async (res) => {
-				if  (res.confirm) {
-					closePopup();
-					try {
-						const loginRes = await uni.login({
-							provider: 'weixin'
-						});
-						if (!loginRes.code) {
-							uni.showToast({
-								title: '获取登录凭证失败',
-								icon: 'none'
-							});
-							return;
-						}
-						const res = await login({
-							code: loginRes.code
-						});
-						uni.setStorageSync('token', res.token);
-						uni.navigateTo({
-							url: `/pages/mine/profile/index?courseId=${courseId.value}&type=login`
-						})
-					} catch (err) {
-						console.error('登录过程发生错误:', err);
-						uni.showToast({
-							title: '登录失败',
-							icon: 'none'
-						});
-					}
-
+			success: async (modalRes) => {
+				if (!modalRes.confirm) return
+				closePopup();
+				try {
+					await wechatLogin()
+					uni.navigateTo({
+						url: `/pages/mine/profile/index?courseId=${courseId.value}&type=login`
+					})
+				} catch (err) {
+					console.error('登录过程发生错误:', err)
 				}
 			}
 		})
