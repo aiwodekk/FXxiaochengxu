@@ -264,9 +264,16 @@
 	}
 
 	const handleBuyAgain = () => {
-		uni.navigateTo({
-			url: '/pages/mine/customer-service/index'
-		})
+		 wx.openCustomerServiceChat({
+		       extInfo: {url: 'https://work.weixin.qq.com/kfid/kfc285c0d23a79fa954'},
+		       corpId: 'ww80f6980562d27520', 
+		       success(res) {
+		         console.log('成功打开客服聊天界面');
+		       },
+		       fail(err) {
+		         console.log('打开客服聊天界面失败', err);
+		       }
+		     });
 	}
 </script>
 

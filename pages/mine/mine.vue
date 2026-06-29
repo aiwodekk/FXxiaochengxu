@@ -31,7 +31,7 @@
 			<view class="menu-item" @click="goToCustomerService">
 				<view class="menu-left">
 					<text class="menu-icon">💬</text>
-					<text class="menu-text">资讯客服</text>
+					<text class="menu-text">联系客服</text>
 				</view>
 				<text class="arrow-right">›</text>
 			</view>
@@ -106,9 +106,16 @@
 	}
 
 	const goToCustomerService = () => {
-		uni.navigateTo({
-			url: '/pages/mine/customer-service/index'
-		})
+		 wx.openCustomerServiceChat({
+		       extInfo: {url: 'https://work.weixin.qq.com/kfid/kfc285c0d23a79fa954'},
+		       corpId: 'ww80f6980562d27520', 
+		       success(res) {
+		         console.log('成功打开客服聊天界面');
+		       },
+		       fail(err) {
+		         console.log('打开客服聊天界面失败', err);
+		       }
+		     });
 	}
 
 	const handleLogout = async () => {

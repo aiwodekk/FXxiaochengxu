@@ -6,6 +6,10 @@
 				<input class="input" v-model="formData.name" placeholder="请输入孩子姓名" />
 			</view>
 			<view class="form-item">
+				<text class="label">身份证号</text>
+				<input class="input" v-model="formData.idCard" placeholder="请输入身份证号" maxlength="18" />
+			</view>
+			<view class="form-item">
 				<text class="label">年龄</text>
 				<input class="input" v-model="formData.age" placeholder="请输入年龄" type="number" />
 			</view>
@@ -44,10 +48,7 @@
 					placeholder="请输入年级"
 				/> -->
 			</view>
-			<view class="form-item">
-				<text class="label">身份证号</text>
-				<input class="input" v-model="formData.idCard" placeholder="请输入身份证号" maxlength="18" />
-			</view>
+
 			<view class="form-item">
 				<text class="label">本人电话</text>
 				<input class="input" v-model="formData.phone" placeholder="请输入本人电话" type="number" maxlength="11" />
@@ -92,7 +93,8 @@
 
 <script setup>
 import {
-	ref
+	ref,
+	watch
 } from 'vue'
 import {
 	onLoad
@@ -182,6 +184,23 @@ const loadChildrenData = () => {
 		}
 	}
 }
+
+watch(() => formData.value.idCard, (val) => {
+	if (val.length === 18) {
+		const birthStr = val.substring(6, 14)
+		const year = parseInt(birthStr.substring(0, 4))
+		const month = parseInt(birthStr.substring(4, 6))
+		const day = parseInt(birthStr.substring(6, 8))
+		const now = new Date()
+		let age = now.getFullYear() - year
+		const currentMonth = now.getMonth() + 1
+		if (currentMonth < month || (currentMonth === month && now.getDate() < day)) {
+			age--
+		}
+		formData.value.age = age
+		formData.value.gender = parseInt(val[16]) % 2 === 1 ? '男' : '女'
+	}
+})
 
 const onGenderChange = (e) => {
 	formData.value.gender = e.detail.value

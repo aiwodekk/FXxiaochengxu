@@ -71,12 +71,6 @@
 			"style": {
 				"navigationBarTitleText": "孩子信息"
 			}
-		},
-		{
-			"path": "pages/mine/customer-service/index",
-			"style": {
-				"navigationBarTitleText": "资讯客服"
-			}
 		}
 	],
 	"globalStyle": {
