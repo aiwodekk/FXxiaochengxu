@@ -117,7 +117,7 @@ onShareTimeline(() => ({
 
 const goToDetail = (item) => {
 	uni.navigateTo({
-		url: `/pages/news-detail/news-detail?title=${item.title}&date=${item.date}&author=${item.author}&id=${item.id}`
+		url: `/pages/news-detail/news-detail?url=${item.url}`
 	})
 }
 </script>
