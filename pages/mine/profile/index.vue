@@ -183,6 +183,31 @@ const getListSchool = async () => {
 }
 
 const saveBtn = async () => {
+	if (!userInfo.value.nickname) {
+		uni.showToast({ title: '请设置昵称', icon: 'none' })
+		return
+	}
+	if (!userInfo.value.tel) {
+		uni.showToast({ title: '请输入手机号', icon: 'none' })
+		return
+	}
+	if (!/^1[3-9]\d{9}$/.test(userInfo.value.tel)) {
+		uni.showToast({ title: '手机号格式错误', icon: 'none' })
+		return
+	}
+	if (!userInfo.value.school) {
+		uni.showToast({ title: '请选择学校', icon: 'none' })
+		return
+	}
+	if (!userInfo.value.grade) {
+		uni.showToast({ title: '请选择年级', icon: 'none' })
+		return
+	}
+	if (!userInfo.value.calssRoom) {
+		uni.showToast({ title: '请选择班级', icon: 'none' })
+		return
+	}
+
 	const gradeVal = gradeMap[userInfo.value.grade] || ''
 	const schoolVal = schoolIdMap.value[userInfo.value.school] || ''
 	const submitData = {

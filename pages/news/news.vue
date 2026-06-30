@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { getNewsList } from '../../api/news'
 
 // 2. 定义分页所需的状态变量
@@ -105,6 +105,15 @@ onLoad(() => {
 	// 页面加载时，初始化数据
 	fetchNews(false)
 })
+
+onShareAppMessage(() => ({
+	title: '访学-资讯',
+	path: '/pages/news/news'
+}))
+
+onShareTimeline(() => ({
+	title: '访学-资讯'
+}))
 
 const goToDetail = (item) => {
 	uni.navigateTo({

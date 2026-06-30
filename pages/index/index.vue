@@ -68,7 +68,9 @@ import {
 } from 'vue'
 import {
 	onLoad,
-	onReachBottom
+	onReachBottom,
+	onShareAppMessage,
+	onShareTimeline
 } from '@dcloudio/uni-app'
 
 import {
@@ -101,6 +103,15 @@ onLoad(() => {
 	loadMoreData()
 	fetchFilterData()
 })
+
+onShareAppMessage(() => ({
+	title: '访学-国内课程',
+	path: '/pages/index/index'
+}))
+
+onShareTimeline(() => ({
+	title: '访学-国内课程'
+}))
 
 // 获取轮播图、课程分类和城市
 const fetchFilterData = async () => {

@@ -39,7 +39,7 @@
 
 		<!-- 退出登录 -->
 		<view class="logout-section">
-			<button class="logout-btn" @click="handleLoginOrLogout">{{ isLoggedIn ? '退出登录' : '立即登录' }}</button>
+			<button class="logout-btn" @click="handleLogout">{{ isLoggedIn ? '退出登录' : '立即登录' }}</button>
 		</view>
 	</view>
 </template>
@@ -52,13 +52,15 @@
 	} from 'vue'
 	import {
 		onLoad,
-		onShow
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app'
 	import changeImage from '../../utils/changeImage.vue'
 	import {
+		login,
 		logout
 	} from '../../api/user'
-	import { wechatLogin } from '../../utils/auth'
 	const userInfo = ref({
 		userImage: '',
 		nickname: '',
@@ -72,23 +74,29 @@
 		loadUserInfo()
 	})
 
+	const checkLoginStatus = () => {
+		const token = uni.getStorageSync('token')
+		const stored = uni.getStorageSync('userInfo')
+		isLoggedIn.value = !!(token && stored && stored.nickname && stored.tel)
+	}
+
 	onShow(() => {
-		const token = uni.getStorageSync('token');
-		isLoggedIn.value = !!token;
-		console.log('当前登录状态:', isLoggedIn.value);
+		checkLoginStatus()
 		loadUserInfo()
 	})
 
 	onMounted(() => {
-		const token = uni.getStorageSync('token');
-		isLoggedIn.value = !!token;
-		console.log('当前登录状态:', isLoggedIn.value);
+		checkLoginStatus()
 		loadUserInfo()
 	})
 
 	const loadUserInfo = () => {
+		if (!isLoggedIn.value) {
+			userInfo.value = { userImage: '', nickname: '', tel: '', school: '', grade: '', calssRoom: '' }
+			return
+		}
 		const storedUserInfo = uni.getStorageSync('userInfo')
-		if (isLoggedIn.value && storedUserInfo) {
+		if (storedUserInfo) {
 			userInfo.value = storedUserInfo
 		}
 	}
@@ -118,23 +126,52 @@
 		     });
 	}
 
-	const handleLoginOrLogout = async () => {
-		if (!uni.getStorageSync('token')) {
+	const handleLogout = async () => {
+		const token = uni.getStorageSync('token')
+		const storedUserInfo = uni.getStorageSync('userInfo')
+
+		if (token && !storedUserInfo) {
+			uni.navigateTo({
+				url: '/pages/mine/profile/index'
+			})
+			return
+		}
+
+		if (!token) {
 			try {
-				await wechatLogin()
+				const loginRes = await uni.login({
+					provider: 'weixin'
+				})
+
+				if (!loginRes.code) {
+					uni.showToast({
+						title: '获取登录凭证失败',
+						icon: 'none'
+					})
+					return
+				}
+				const res = await login({
+					code: loginRes.code
+				})
+				uni.setStorageSync('token', res.token)
 				uni.navigateTo({
 					url: '/pages/mine/profile/index?type=login'
 				})
 			} catch (err) {
 				console.error('登录过程发生错误:', err)
+				uni.showToast({
+					title: '登录失败',
+					icon: 'none'
+				})
 			}
 			return
 		}
+
 		uni.showModal({
 			title: '提示',
 			content: '确定要退出登录吗?',
-			success: (modalRes) => {
-				if (modalRes.confirm) {
+			success: (res) => {
+				if (res.confirm) {
 					logout()
 					uni.removeStorageSync('userInfo')
 					uni.removeStorageSync('token')
@@ -155,7 +192,16 @@
 			}
 		})
 	}
-</script>
+
+	onShareAppMessage(() => ({
+		title: '访学',
+		path: '/pages/mine/mine'
+	}))
+
+	onShareTimeline(() => ({
+		title: '访学'
+	}))
+	</script>
 
 <style scoped>
 	.mine-container {

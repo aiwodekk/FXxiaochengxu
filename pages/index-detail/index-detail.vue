@@ -108,12 +108,16 @@ import {
 	onMounted
 } from 'vue';
 import {
-	onLoad
+	onLoad,
+	onShareAppMessage,
+	onShareTimeline
 } from '@dcloudio/uni-app';
 import {
 	getDomesticCourseDetail
 } from '../../api/course'
-import { wechatLogin } from '../../utils/auth'
+import {
+	login
+} from '../../api/user'
 // --- 数据模拟 ---
 // 轮播图占位
 const bannerImages = [];
@@ -338,25 +342,45 @@ const closePopup = () => {
 };
 
 const confirmJoin = () => {
-	if (uni.getStorageSync('token') && uni.getStorageSync('userInfo')) {
+	if (uni.getStorageSync('token')&&uni.getStorageSync('userInfo')) {
 		closePopup();
 		uni.navigateTo({
 			url: `/pages/mine/profile/children-edit?mode=add&courseId=${courseId.value}`
 		})
 	} else {
+		// 提示登录，点击确定跳转到登录页面
 		uni.showModal({
 			title: '提示',
 			content: '请先登录',
-			success: async (modalRes) => {
-				if (!modalRes.confirm) return
-				closePopup();
-				try {
-					await wechatLogin()
-					uni.navigateTo({
-						url: `/pages/mine/profile/index?courseId=${courseId.value}&type=login`
-					})
-				} catch (err) {
-					console.error('登录过程发生错误:', err)
+			success: async (res) => {
+				if  (res.confirm) {
+					closePopup();
+					try {
+						const loginRes = await uni.login({
+							provider: 'weixin'
+						});
+						if (!loginRes.code) {
+							uni.showToast({
+								title: '获取登录凭证失败',
+								icon: 'none'
+							});
+							return;
+						}
+						const res = await login({
+							code: loginRes.code
+						});
+						uni.setStorageSync('token', res.token);
+						uni.navigateTo({
+							url: `/pages/mine/profile/index?courseId=${courseId.value}&type=login`
+						})
+					} catch (err) {
+						console.error('登录过程发生错误:', err);
+						uni.showToast({
+							title: '登录失败',
+							icon: 'none'
+						});
+					}
+
 				}
 			}
 		})
@@ -374,21 +398,26 @@ onMounted(() => {
 		updateSliderPosition();
 	}, 100);
 });
-const onShareAppMessage = () => {
-	// 获取当前页面的路径参数（确保分享出去的路径是最新的）
+onShareAppMessage(() => {
 	const pages = getCurrentPages()
 	const currentPage = pages[pages.length - 1]
-	const route = currentPage.route
-	const options = currentPage.options
-	const id = options.id // 获取 URL 中的 id 参数
-	console.log(id);
-
+	const id = currentPage.options?.id
 	return {
-		title: `我正在报名，快来一起参加吧！`, // 分享标题
-		path: `/pages/index-detail/index-detail?id=${id}`, // 拼接路径
-		imageUrl: bannerImages?.value[0]?.image || '' // 使用课程首图作为封面
+		title: '我正在报名，快来一起参加吧！',
+		path: `/pages/index-detail/index-detail?id=${id}`,
+		imageUrl: bannerImages[0]?.image || ''
 	}
-}
+})
+
+onShareTimeline(() => {
+	const pages = getCurrentPages()
+	const currentPage = pages[pages.length - 1]
+	const id = currentPage.options?.id
+	return {
+		title: courseName.value || '访学课程',
+		imageUrl: bannerImages[0]?.image || ''
+	}
+})
 </script>
 
 <style lang="scss" scoped>
