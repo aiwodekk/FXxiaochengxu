@@ -22,7 +22,6 @@
 				<text class="label">手机号</text>
 				<input class="input" v-model="userInfo.tel" placeholder="请输入手机号" type="number" @blur="saveUserInfo" />
 			</view>
-			<view class="privacy-tip">仅用于项目管理、活动安排及教育交流等用途,确认即同意</view>
 			<view class="form-item">
 				<text class="label">就读学校</text>
 				<picker :value="userInfo.school" :range="schoolList" @change="changeShool">
@@ -49,6 +48,7 @@
 					<view>{{ userInfo.calssRoom || '请选择班级' }}</view>
 				</picker>
 			</view>
+			<view class="privacy-tip">以上信息仅用于项目管理、活动安排及教育交流等用途,确认即同意</view>
 		</view>
 
 
