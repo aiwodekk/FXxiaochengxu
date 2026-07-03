@@ -1,10 +1,13 @@
 <script>
+	import { setupPrivacy } from './utils/privacy'
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
+			
 		},
 		onShow: function() {
 			console.log('App Show')
+			setupPrivacy()
 		},
 		onHide: function() {
 			console.log('App Hide')

@@ -87,10 +87,12 @@
 		<button style="width: 50%;margin-top: 20px;background-color: #FF9933;color: white;border-radius: 5px;"
 			@click="saveBtn">确定</button>
 
+		<PrivacyPopup />
 	</view>
 </template>
 
 <script setup>
+import PrivacyPopup from '../../../components/privacy-popup.vue'
 import changeImage from '../../../utils/changeImage.vue'
 import {
 	ref,
